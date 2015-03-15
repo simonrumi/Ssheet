@@ -21,35 +21,43 @@
 	<body>
 		<div id="mainGrid" ng-controller="GridController">
 			<h1>Main Ssheet</h1>
-			<table>
+			
+			<!-- Some test stuff to be deleted -->
+			<p>Test directive: 
+				<div class="testDrag" ss-drag-col-width >
+				</div> 
+				<div class="testDrag" ss-drag-col-width>
+				</div> 
+			</p>
+			
+			<!-- the main table holding the grid -->
+			<table id="grid">
 				<thead>
 					<tr>
-						<td ng-repeat="element in filter">
-							<input class="filter" ng-model="filter[$index].filterExpression" ng-focus="getCurrentColumn()" ng-change="updateFilter()">
+						<td ng-repeat-start="element in filterRow">
+							<input class="filter" 
+								ng-model="filterRow[$index].filterExpression" 
+								ng-focus="getCurrentColumn()" 
+								ng-change="updateFilter()">
+						</td>
+						<td ng-repeat-end class="spacer" ss-drag-col-width> 
 						</td>
 					</tr>
 				</thead>
 				<tbody>
-					<tr ng-repeat="element in grid">
-						<td ng-repeat="subElement in element.cells">
-							<input ng-model="grid[$parent.$index].cells[$index].contents" ng-show="grid[$parent.$index].cells[$index].isVisible"> 
-							<!-- later add these to show/hide depending on the filter: ng-show="SomeVariableTHatWeUpdate" class="ng-hide"   -->
+					<tr ng-repeat="element in grid" ng-show="grid[$index].isVisible" >
+						<td ng-repeat-start="subElement in element.cells">
+							<input 
+								ng-model="grid[$parent.$index].cells[$index].contents" 
+								ng-show="grid[$parent.$index].cells[$index].isVisible" >
+						</td>
+						<td ng-repeat-end class="spacer">
 						</td>
 					</tr>
 				</tbody>
 				<tfoot></tfoot>
 			</table>
-			<p>&nbsp;</p>
-			<h1>Shadow Ssheet</h1>
-			<table>
-				<thead><tr><td colspan="5"></td></tr></thead>
-				<tbody>
-					<tr ng-repeat="element in grid">
-						<td ng-repeat="subElement in element.cells">{{ subElement.contents }}</td>
-					</tr>
-				</tbody>
-				<tfoot></tfoot>
-			</table>
-		</div>
+			
+		</div> <!-- end of mainGrid -->
 	</body>
 </html>
