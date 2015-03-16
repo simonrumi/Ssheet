@@ -20,38 +20,30 @@
 	</head>
 	<body>
 		<div id="mainGrid" ng-controller="GridController">
-			<h1>Main Ssheet</h1>
-			
-			<!-- Some test stuff to be deleted -->
-			<p>Test directive: 
-				<div class="testDrag" ss-drag-col-width >
-				</div> 
-				<div class="testDrag" ss-drag-col-width>
-				</div> 
-			</p>
+			<h1>S-sheet</h1>
 			
 			<!-- the main table holding the grid -->
 			<table id="grid">
 				<thead>
 					<tr>
-						<td ng-repeat-start="element in filterRow">
+						<td ng-repeat-start="element in filterRow" id="{{element.cellId}}">
 							<input class="filter" 
 								ng-model="filterRow[$index].filterExpression" 
 								ng-focus="getCurrentColumn()" 
 								ng-change="updateFilter()">
 						</td>
-						<td ng-repeat-end class="spacer" ss-drag-col-width> 
+						<td ng-repeat-end class="spacer" ss-drag-col-width id="spacer_{{element.cellId}}"> 
 						</td>
 					</tr>
 				</thead>
 				<tbody>
 					<tr ng-repeat="element in grid" ng-show="grid[$index].isVisible" >
-						<td ng-repeat-start="subElement in element.cells">
+						<td ng-repeat-start="subElement in element.cells" id="{{subElement.cellId}}">
 							<input 
 								ng-model="grid[$parent.$index].cells[$index].contents" 
 								ng-show="grid[$parent.$index].cells[$index].isVisible" >
 						</td>
-						<td ng-repeat-end class="spacer">
+						<td ng-repeat-end class="spacer" ss-drag-col-width id="spacer_{{subElement.cellId}}">
 						</td>
 					</tr>
 				</tbody>
