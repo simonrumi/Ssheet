@@ -4,6 +4,80 @@
 
 	var ssheet = angular.module('ssheet', []);
 
+	/**
+	* @method cellFinder A Service that provides some helper functions for dealing with the grid
+	*/
+	ssheet.factory('cellFinder', [function() {
+		var getCurrentColumnFromSpacerCell;
+		var getCurrentRowFromSpacerCell;
+		
+		return {
+			/**
+			* @method getCurrentColumnFromSpacerCell When the user clicks on a "spacer" cell
+			* this returns an array with all the cells in the column to the immediate left of the spacer.
+			* This is done so the user can drag the width of a column by dragging the spacer cell
+			* @param {DOM element} domElement The element the user clicked on in the UI
+			* @param scope A scope object (expecting the $scope from the Controller)
+			* @return {Array} An array of cells from the grid oject, that represent all the cells in a particular column
+			*/
+			getCurrentColumnFromSpacerCell: function (domElement, scope) {
+				var rowObj;
+				var columnArr = [];
+				
+				// the id attribute of the cell to the left of the spacer cell is in the format 
+				// [row number]_[column number]
+				// so split on '_' and get the 2nd array value to get the column number
+				var col = parseInt( domElement.prev().attr('id').split('_')[1] ); 
+				
+				// // clear the currentColArr so we can populate it with the cells in the column we're in now
+				// $scope.currentColumnArr = [];
+				
+				// put all the cells in the column into the global currentColumnArr
+				for (rowObj in scope.grid) {
+					// $scope.currentColumnArr.push( $scope.grid[rowObj].cells[col] );
+					columnArr.push( scope.grid[rowObj].cells[col] );
+				}
+				
+				// need to separately add the cell from the filter row
+				// $scope.currentColumnArr.push( $scope.filterRow[col] );
+				columnArr.push( scope.filterRow[col] );
+				
+				return columnArr;
+			},
+			
+			
+			/**
+			* @method getCurrentRowFromSpacerCell When the user clicks on a "spacer" cell
+			* This returns an array with all the cells in the row the user clicked on.
+			* This is done so the user can drag the height of a column by dragging the spacer cell
+			* @param {DOM element} domElement The element the user clicked on in the UI
+			* @param scope A scope object (expecting the $scope from the Controller)
+			* @return {Array} An array of cells from the grid oject, that represent all the cells in a particular row
+			*/
+			getCurrentRowFromSpacerCell: function (domElement, scope) {
+				var cellObj;
+				
+				// the id attribute of the cell to the left of the spacer cell is in the format 
+				// [row number]_[column number]
+				// or if we're on the filter row then it will be 
+				// filt_[column number]
+				// so split on '_' and get the 1st array value to get the row number
+				var row = domElement.prev().attr('id').split('_')[0];
+				
+				if (row == 'filt') {
+					alert('cannot resize filter row - need to update to make all cells filter cells');
+					return [];
+				} else {
+					row = parseInt(row);
+				}
+				
+				return scope.grid[row]['cells'];
+			}
+		
+		}
+	}]);
+
+
 	ssheet.controller('GridController', ['$scope', function ($scope) {
 		$scope.gridwidth = 8;
 		$scope.gridheight = 8;
@@ -96,67 +170,15 @@
 			}
 		}
 		
-		/**
-		******** THIS (and other stuff in thsi controller) NEEDS TO GO INTO A SERVICE
-		* @method getCurrentColumnFromSpacerCell When the user clicks on a "spacer" cell 
-		* this populates the currentColumnArr with all the cells in the column to the immediate left of the spacer
-		* this is done so the user can drag the width of a column by dragging the spacer cell
-		* @param {DOM element} domElement The element the user clicked on in the UI
-		*/
-		$scope.getCurrentColumnFromSpacerCell = function (domElement) {
-			var rowObj;
-			var columnArr = [];
-			
-			// the id attribute of the cell to the left of the spacer cell is in the format 
-			// [row number]_[column number]
-			// so split on '_' and get the 2nd array value to get the column number
-			var col = parseInt( domElement.prev().attr('id').split('_')[1] ); 
-			
-			// // clear the currentColArr so we can populate it with the cells in the column we're in now
-			// $scope.currentColumnArr = [];
-			
-			// put all the cells in the column into the global currentColumnArr
-			for (rowObj in $scope.grid) {
-				// $scope.currentColumnArr.push( $scope.grid[rowObj].cells[col] );
-				columnArr.push( $scope.grid[rowObj].cells[col] );
-			}
-			
-			// need to separately add the cell from the filter row
-			// $scope.currentColumnArr.push( $scope.filterRow[col] );
-			columnArr.push( $scope.filterRow[col] );
-			
-			return columnArr;
-		}
-		
-		$scope.getCurrentRowFromSpacerCell = function (domElement) {
-			var cellObj;
-			
-			// the id attribute of the cell to the left of the spacer cell is in the format 
-			// [row number]_[column number]
-			// or if we're on the filter row then it will be 
-			// filt_[column number]
-			// so split on '_' and get the 1st array value to get the row number
-			var row = domElement.prev().attr('id').split('_')[0];
-			
-			if (row == 'filt') {
-				alert('cannot resize filter row - need to update to make all cells filter cells');
-				return [];
-			} else {
-				row = parseInt(row);
-			}
-			
-			return $scope.grid[row]['cells'];
-		}
-		
 	}]);
 
 	
 	/**
-	* @method ssDragColWidth A directive that allows for dragging of a "spacer" table cell 
+	* @method ssResizeCells A directive that allows for dragging of a "spacer" table cell 
 	* (thin cells in between the cells with actual data) in order to change the width of the cell to the left of the spacer
 	* @param $document The Angularjs handle for the window.document object
 	*/
-	ssheet.directive('ssDragColWidth', ['$document', function($document) {
+	ssheet.directive('ssResizeCells', ['$document', 'cellFinder', function($document, cellFinder) {
 		
 		// see "Creating a Directive that Adds Event Listeners" section of https://docs.angularjs.org/guide/directive
 		return { 	
@@ -169,9 +191,9 @@
 					
 			link: function ($scope, element, attrs) {
 				var initialX = 0;
-				var initialWidth;
+				var initialWidth = 0;
 				var initialY = 0;
-				var initialHeight;
+				var initialHeight = 0;
 				var xDistance = 0;
 				var yDistance = 0;
 				
@@ -189,8 +211,9 @@
 					initialWidth = parseInt( element.prev().css('width') );
 					initialHeight = parseInt( element.prev().css('height') );
 					
-					colArr = $scope.getCurrentColumnFromSpacerCell(element);
-					rowArr = $scope.getCurrentRowFromSpacerCell(element);
+					//colArr = $scope.getCurrentColumnFromSpacerCell(element);
+					colArr = cellFinder.getCurrentColumnFromSpacerCell(element, $scope);
+					rowArr = cellFinder.getCurrentRowFromSpacerCell(element, $scope);
 					
 					$document.on('mousemove', mousemoveHandler);
 					$document.on('mouseup', mouseupHandler);		
@@ -247,6 +270,14 @@
 					//remove the event handlers now the mouse drag is over
 					$document.off('mousemove', mousemoveHandler);
 					$document.off('mouseup', mouseupHandler);
+					
+					//reset all the function-wide variables
+					initialX = 0;
+					initialWidth = 0;
+					initialY = 0;
+					initialHeight = 0;
+					xDistance = 0;
+					yDistance = 0;
 					
 					$('html').css('cursor', 'auto');
 					element.css('position', 'static');

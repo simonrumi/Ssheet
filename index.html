@@ -32,7 +32,7 @@
 								ng-focus="getCurrentColumnFromFilterCell()" 
 								ng-change="updateFilter()">
 						</td>
-						<td ng-repeat-end class="spacer" ss-drag-col-width id="spacer_{{element.cellId}}"> 
+						<td ng-repeat-end class="spacer" ss-resize-cells id="spacer_{{element.cellId}}"> 
 						</td>
 					</tr>
 				</thead>
@@ -43,7 +43,7 @@
 								ng-model="grid[$parent.$index].cells[$index].contents" 
 								ng-show="grid[$parent.$index].cells[$index].isVisible" ></textarea>
 						</td>
-						<td ng-repeat-end class="spacer" ss-drag-col-width id="spacer_{{subElement.cellId}}"></td>
+						<td ng-repeat-end class="spacer" ss-resize-cells id="spacer_{{subElement.cellId}}"></td>
 					</tr>
 				</tbody>
 				<tfoot></tfoot>
