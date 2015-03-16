@@ -11,8 +11,10 @@
 		$scope.filterRow = [];
 		$scope.currentColumnArr = [];
 		$scope.currentColumnIndex = -1;
-		$scope.minWidth = 20;
 		
+		// global setting for minimum height and width of cells - need this in some kind of config file
+		$scope.minWidth = 20;
+		$scope.minHeight = 12;
 		
 		$scope.init = function () {
 			var i;
@@ -62,7 +64,7 @@
 		/**
 		* When the user enters data in the filter row this function is called
 		* It uses the currentColumnArr which is an array of all the cells (one from each row) that are in the column
-		* the currentColumnArr is updated when the user first clicks in the filter by getCurrentColumn (below) 
+		* the currentColumnArr is updated when the user first clicks in the filter by getCurrentColumnFromFilterCell (below) 
 		*/
 		$scope.updateFilter = function () {
 			var cellIndex;
@@ -77,17 +79,16 @@
 		}
 		
 		/**
-		* When the user first clicks in a filter cell getCurrentColumn updates  currentColumnArr
+		* When the user first clicks in a filter cell getCurrentColumnFromFilterCell updates currentColumnArr
 		* to be  an array of all the cells (one from each row) that are in the same column as the filter cell
+		* updateFilter() can then repeatedly use the currentColumnArr until the user clicks in another filter column
 		*/
-		$scope.getCurrentColumn = function () {
+		$scope.getCurrentColumnFromFilterCell = function () {
 			var rowObj;
 			
 			if ($scope.currentColumnIndex != this.element.filtercol) {
 				$scope.currentColumnIndex = this.element.filtercol;
 				$scope.currentColumnArr = [];
-				
-				//alert('getCurrentColumn: currentColumnIndex=' + $scope.currentColumnIndex);
 				
 				for (rowObj in $scope.grid) {
 					$scope.currentColumnArr.push( $scope.grid[rowObj].cells[this.element.filtercol] );
@@ -96,6 +97,7 @@
 		}
 		
 		/**
+		******** THIS (and other stuff in thsi controller) NEEDS TO GO INTO A SERVICE
 		* @method getCurrentColumnFromSpacerCell When the user clicks on a "spacer" cell 
 		* this populates the currentColumnArr with all the cells in the column to the immediate left of the spacer
 		* this is done so the user can drag the width of a column by dragging the spacer cell
@@ -103,20 +105,47 @@
 		*/
 		$scope.getCurrentColumnFromSpacerCell = function (domElement) {
 			var rowObj;
+			var columnArr = [];
 			
-			// the id attribute of the cell is in the format [row number]_[column number], so split on '_' and get the 2nd array value
+			// the id attribute of the cell to the left of the spacer cell is in the format 
+			// [row number]_[column number]
+			// so split on '_' and get the 2nd array value to get the column number
 			var col = parseInt( domElement.prev().attr('id').split('_')[1] ); 
 			
-			// clear the currentColArr so we can populate it with the cells in the column we're in now
-			$scope.currentColumnArr = [];
+			// // clear the currentColArr so we can populate it with the cells in the column we're in now
+			// $scope.currentColumnArr = [];
 			
 			// put all the cells in the column into the global currentColumnArr
 			for (rowObj in $scope.grid) {
-				$scope.currentColumnArr.push( $scope.grid[rowObj].cells[col] );
+				// $scope.currentColumnArr.push( $scope.grid[rowObj].cells[col] );
+				columnArr.push( $scope.grid[rowObj].cells[col] );
 			}
 			
 			// need to separately add the cell from the filter row
-			$scope.currentColumnArr.push( $scope.filterRow[col] );
+			// $scope.currentColumnArr.push( $scope.filterRow[col] );
+			columnArr.push( $scope.filterRow[col] );
+			
+			return columnArr;
+		}
+		
+		$scope.getCurrentRowFromSpacerCell = function (domElement) {
+			var cellObj;
+			
+			// the id attribute of the cell to the left of the spacer cell is in the format 
+			// [row number]_[column number]
+			// or if we're on the filter row then it will be 
+			// filt_[column number]
+			// so split on '_' and get the 1st array value to get the row number
+			var row = domElement.prev().attr('id').split('_')[0];
+			
+			if (row == 'filt') {
+				alert('cannot resize filter row - need to update to make all cells filter cells');
+				return [];
+			} else {
+				row = parseInt(row);
+			}
+			
+			return $scope.grid[row]['cells'];
 		}
 		
 	}]);
@@ -142,20 +171,26 @@
 				var initialX = 0;
 				var initialWidth;
 				var initialY = 0;
+				var initialHeight;
 				var xDistance = 0;
 				var yDistance = 0;
+				
+				var rowArr = [];
+				var colArr = [];
 				
 				element.on('mousedown', function(event) {
 					console.log('mousedown');
 					event.preventDefault();
 					
-					$('html').css('cursor', 'col-resize');
+					$('html').css('cursor', 'se-resize');
 					
 					initialX = event.pageX - xDistance;
 					initialY = event.pageY - yDistance;
 					initialWidth = parseInt( element.prev().css('width') );
+					initialHeight = parseInt( element.prev().css('height') );
 					
-					$scope.getCurrentColumnFromSpacerCell(element);
+					colArr = $scope.getCurrentColumnFromSpacerCell(element);
+					rowArr = $scope.getCurrentRowFromSpacerCell(element);
 					
 					$document.on('mousemove', mousemoveHandler);
 					$document.on('mouseup', mouseupHandler);		
@@ -166,27 +201,43 @@
 					var cellIndex;
 					var cell;
 					var cellId;
+					var newWidth;
+					var newHeight;
 					
-					console.log('mousemoveHandler: event.pageX=' + event.pageX);
 					xDistance = event.pageX - initialX;
 					yDistance = event.pageY - initialY;
 					
 					//set the new width of the column immediately to the left, but don't go smaller than the minimum width
-					var newWidth = initialWidth + xDistance;
+					newWidth = initialWidth + xDistance;
 					if (newWidth < $scope.minWidth) {
 						newWidth = $scope.minWidth;
 					}
+					
+					newHeight = initialHeight + yDistance;
+					if (newHeight < $scope.minHeight) {
+						newHeight = $scope.minHeight;
+					}
+					
 					console.log('newWidth=' + newWidth + ' initialX=' +initialX + ' xDistance=' + xDistance);
+					console.log('newHeight=' + newHeight + ' initialY=' +initialY + ' yDistance=' + yDistance);
 						
 					//adjust the width of all cells in the column
-					for (cellIndex in $scope.currentColumnArr) {
-						cell = $scope.currentColumnArr[cellIndex];
+					for (cellIndex in colArr) {
+						cell = colArr[cellIndex];
 						cellId = '#' + cell.cellId;
 						$(cellId).css('width', newWidth);
 						console.log('mousemoveHandler: just set cellId ' + cellId + ' to newWidth ' + newWidth);
 					}
 					
 					element.css('left', event.pageX + 'px');
+					
+					//adjust the height of all the cells in the row
+					for (cellIndex in rowArr) {
+						cell = rowArr[cellIndex];
+						cellId = '#' + cell.cellId;
+						$(cellId).css('height', newHeight);
+						console.log('mousemoveHandler: just set cellId ' + cellId + ' to newHeight ' + newHeight);
+					} 
 				};
 				
 				// reset everything once the mouse-drag is over

@@ -29,7 +29,7 @@
 						<td ng-repeat-start="element in filterRow" id="{{element.cellId}}">
 							<input class="filter" 
 								ng-model="filterRow[$index].filterExpression" 
-								ng-focus="getCurrentColumn()" 
+								ng-focus="getCurrentColumnFromFilterCell()" 
 								ng-change="updateFilter()">
 						</td>
 						<td ng-repeat-end class="spacer" ss-drag-col-width id="spacer_{{element.cellId}}"> 
@@ -39,12 +39,11 @@
 				<tbody>
 					<tr ng-repeat="element in grid" ng-show="grid[$index].isVisible" >
 						<td ng-repeat-start="subElement in element.cells" id="{{subElement.cellId}}">
-							<input 
+							<textarea
 								ng-model="grid[$parent.$index].cells[$index].contents" 
-								ng-show="grid[$parent.$index].cells[$index].isVisible" >
+								ng-show="grid[$parent.$index].cells[$index].isVisible" ></textarea>
 						</td>
-						<td ng-repeat-end class="spacer" ss-drag-col-width id="spacer_{{subElement.cellId}}">
-						</td>
+						<td ng-repeat-end class="spacer" ss-drag-col-width id="spacer_{{subElement.cellId}}"></td>
 					</tr>
 				</tbody>
 				<tfoot></tfoot>

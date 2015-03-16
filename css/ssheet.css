@@ -14,7 +14,12 @@ td {
 
 textarea, input {
 	border-style: none;
-	width: 100%
+	width: 100%;
+}
+
+textarea {
+	resize: none;
+	height: 100%;
 }
 
 textarea:focus, input:focus {
@@ -49,11 +54,11 @@ textarea:focus, input:focus {
 
 .spacer {
 	background-color: rgba(181,177,71,0.125);
-	width: 3px;
 	padding: 0px;
 	border: none;
+	width: 7px;
 }
 
 .spacer:hover {
-	cursor: col-resize;
+	cursor: se-resize;
 }
