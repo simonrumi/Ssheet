@@ -63,17 +63,6 @@ textarea:focus, input:focus {
 	cursor: se-resize;
 }
 
-.old-cell-context-menu-to-be-deleted {
-	z-index: 10000;
-	position: fixed;
-	width: 200px;
-	height: 300px;
-	background-color: #B5B147;
-	
-	display: inline; /*initially not displayed*/
-}
-
-
 
 /************* ppop up menu stuff **************/
 
@@ -81,16 +70,8 @@ textarea:focus, input:focus {
 	/* A centered div above the overlay with a box shadow. */
 	z-index: 10000;
 	position: absolute;
-	width:50%;
-	 
-	/*center the dialog*/
-	top: 50%;
-	left: 50%;
-	 
-	/* move the dialog around using translate (also can do 3D matrix stuff if desired) */
-	transform: translate(-50%, -50%);
-	-webkit-transform: translate(-50%, -50%);
-  	-moz-transform: translate(-50%, -50%);
+	width: 200px;
+	height: 300px;
   	
   	background-color: #B5B147;
   	box-shadow: 4px 4px 80px #000000;

@@ -26,9 +26,12 @@
 		
 		<!-- template for use by context-menu-dialog -->
 		<script type="text/ng-template" id="contextMenuDialog.html">
-			<div class="ss-cell-context-menu" 					ng-show="showFromDirective"	ng-style="contextMenuStyle">
-				<div class="ss-modal-close" 					ng-click="hideModal()">x</div>
-				<div class="ss-content-from-custom-html-tag" 	ng-transclude></div>
+			<div class="ss-cell-context-menu" 					
+				ng-show="showFromDirective"	
+				show-from-element="showFromController"
+				ng-style="contextMenuStyle">
+					<div class="ss-modal-close" 					ng-click="hideModal()">x</div>
+					<div class="ss-content-from-custom-html-tag" 	ng-transclude></div>
 			</div>
 		</script>
 		
@@ -70,7 +73,7 @@
 			
 			<button ng-click="toggleModalFromController()">Open Modal Dialog</button>
 			
-			<context-menu-dialog show-from-element="showFromController" width='200px' height='400px'> <!-- QQQQQ test chaning show-from-element to something else -->
+			<context-menu-dialog>
 				<p>this is content from the context-menu-dialog custom html tag which should be inserted where the ng-transclude attr is placed within the template</p>
 			</context-menu-dialog>
 			

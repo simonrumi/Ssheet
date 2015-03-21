@@ -215,7 +215,7 @@
 		
 		
 		/**** context menu hide/show stuff ********/
-		$scope.showFromController = true;
+		$scope.showFromController = false;
 		$scope.toggleModalFromController = function () {
 			$scope.showFromController = !$scope.showFromController;
 			console.log('toggleModalFromController: $scope.showFromController is now ' + $scope.showFromController);
@@ -281,22 +281,22 @@
 				});
 				
 				
-/* QQQQ will reinstate these later
-				element.on('contextmenu', function (event) {
-					console.log('context menu selected and scope.$parent.$parent.showFromController is ' + scope.$parent.$parent.showFromController);
-					event.preventDefault();
-					event.stopPropagation();
-					
-					contextMenuDialog.positionContextMenu(event);
 
-					scope.$parent.showModalFromController();
-					console.log('after calling scope.$parent.showModalFromController, scope.$parent.showFromController is now ' + scope.$parent.showFromController);
-				});
+				// element.on('contextmenu', function (event) {
+				// 	console.log('context menu selected and scope.$parent.$parent.showFromController is ' + scope.$parent.$parent.showFromController);
+				// 	event.preventDefault();
+				// 	event.stopPropagation();
+					
+				// 	//contextMenuDialog.positionContextMenu(event);
+
+				// 	scope.$parent.showModalFromController();
+				// 	console.log('after calling scope.$parent.showModalFromController, scope.$parent.showFromController is now ' + scope.$parent.showFromController);
+				// });
 				 
-				element.on('mouseleave', function (event) {
-					scope.$parent.showFromController = false;
-				});
-*/				
+				// element.on('mouseleave', function (event) {
+				// 	scope.$parent.showFromController = false;
+				// });
+			
 				
 				function mousemoveHandler(event) {
 					var cellIndex;
