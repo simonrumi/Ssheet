@@ -2,7 +2,7 @@
 
 (function() {
 
-	var ssheet = angular.module('ssheet', []);
+	var ssheet = angular.module('ssheet', ['ui.bootstrap']);
 
 	/**
 	* @method cellFinder A Service that provides some helper functions for dealing with the grid
@@ -29,17 +29,12 @@
 				// so split on '_' and get the 2nd array value to get the column number
 				var col = parseInt( domElement.prev().attr('id').split('_')[1] ); 
 				
-				// // clear the currentColArr so we can populate it with the cells in the column we're in now
-				// $scope.currentColumnArr = [];
-				
-				// put all the cells in the column into the global currentColumnArr
+				// put all the cells in the column into the columnArr
 				for (rowObj in scope.grid) {
-					// $scope.currentColumnArr.push( $scope.grid[rowObj].cells[col] );
 					columnArr.push( scope.grid[rowObj].cells[col] );
 				}
 				
 				// need to separately add the cell from the filter row
-				// $scope.currentColumnArr.push( $scope.filterRow[col] );
 				columnArr.push( scope.filterRow[col] );
 				
 				return columnArr;
@@ -76,6 +71,54 @@
 		
 		}
 	}]);
+
+
+
+	ssheet.directive('contextMenuDialog', [ function () {
+		return {
+			restrict: 'EA',
+			
+			//priority: 10, // this should get compliled before ssResizeCells
+			
+			scope: {
+				showFromDirective: '=showFromElement'
+			},
+			
+			// replace means that the <context-menu-dialog> tag itself will be replaced by the template, rather than being the parent of the template's html
+			// however the attributes of the <context-menu-dialog> will be added to the top level element in the template
+			replace: true, 
+			transclude: true, /// this means that the content in between the tags <context-menu-dialog></context-menu-dialog> will be inserted in the template where "ng-transclude" appears
+			
+			link: function (scope, element, attrs) {
+				console.log('contextMenuDialog: link function started, element is: ' + element[0] + ', scope is ' + scope + ', attrs are ' + JSON.stringify(attrs.$attr) );
+				
+				scope.contextMenuStyle = {};
+				
+				
+				// possibly might want to make this a function, called like hideModal
+				//scope.positionContextMenu = function (event) {
+					
+					scope.contextMenuStyle.position = 'absolute';
+					scope.contextMenuStyle.left = event.pageX + 'px';
+					scope.contextMenuStyle.top = event.pageY + 'px';
+					
+					// originally was:
+					// $('.cell-context-menu').css('position', 'absolute');
+					// $('.cell-context-menu').css('left', event.pageX + 'px');
+					// $('.cell-context-menu').css('top', event.pageY + 'px');
+					
+				//} end of possible function positionContextMenu
+				
+				scope.hideModal = function() {
+					scope.showFromDirective = false;
+				};
+				
+			},
+			
+			templateUrl: 'contextMenuDialog.html',
+		}
+	}]);
+
 
 
 	ssheet.controller('GridController', ['$scope', function ($scope) {
@@ -170,26 +213,45 @@
 			}
 		}
 		
+		
+		/**** context menu hide/show stuff ********/
+		$scope.showFromController = true;
+		$scope.toggleModalFromController = function () {
+			$scope.showFromController = !$scope.showFromController;
+			console.log('toggleModalFromController: $scope.showFromController is now ' + $scope.showFromController);
+		}
+		
+		$scope.showModalFromController = function () {
+			$scope.showFromController = true;
+			console.log('showModal: $scope.showFromController is now ' + $scope.showFromController);
+		}
+		
+		
 	}]);
 
 	
+	
+	
+	
 	/**
 	* @method ssResizeCells A directive that allows for dragging of a "spacer" table cell 
-	* (thin cells in between the cells with actual data) in order to change the width of the cell to the left of the spacer
+	* (thin cells in between the cells with actual data) in order to change the width & height of the cell to the left of the spacer
 	* @param $document The Angularjs handle for the window.document object
 	*/
-	ssheet.directive('ssResizeCells', ['$document', 'cellFinder', function($document, cellFinder) {
+	ssheet.directive('ssResizeCells', ['$document', 'cellFinder',  
+		function ($document, cellFinder) {
 		
-		// see "Creating a Directive that Adds Event Listeners" section of https://docs.angularjs.org/guide/directive
 		return { 	
 		
 			restrict: 'A',
 			
+			//priority: 1, // this should get compliled after contextMenuDialog
+			
 			// note that we are not creating an isolate scope here, because the user is clicking on one DOM element (a spacer cell)
-			// but we want to manipulate the width of all the cells in the column to its left, so using the $scope from the controller
-			// we can get access to all the DOM elements we need
-					
-			link: function ($scope, element, attrs) {
+			// but we want to manipulate the width of all the cells in the column to its left 
+			// and drag the mouse at the level of the document, not just the element clicked on 
+			// so using the scope from the controller
+			link: function (scope, element, attrs) {
 				var initialX = 0;
 				var initialWidth = 0;
 				var initialY = 0;
@@ -200,7 +262,7 @@
 				var rowArr = [];
 				var colArr = [];
 				
-				element.on('mousedown', function(event) {
+				element.on('mousedown', function (event) {
 					console.log('mousedown');
 					event.preventDefault();
 					
@@ -211,14 +273,30 @@
 					initialWidth = parseInt( element.prev().css('width') );
 					initialHeight = parseInt( element.prev().css('height') );
 					
-					//colArr = $scope.getCurrentColumnFromSpacerCell(element);
-					colArr = cellFinder.getCurrentColumnFromSpacerCell(element, $scope);
-					rowArr = cellFinder.getCurrentRowFromSpacerCell(element, $scope);
+					colArr = cellFinder.getCurrentColumnFromSpacerCell(element, scope);
+					rowArr = cellFinder.getCurrentRowFromSpacerCell(element, scope);
 					
 					$document.on('mousemove', mousemoveHandler);
 					$document.on('mouseup', mouseupHandler);		
 				});
 				
+				
+/* QQQQ will reinstate these later
+				element.on('contextmenu', function (event) {
+					console.log('context menu selected and scope.$parent.$parent.showFromController is ' + scope.$parent.$parent.showFromController);
+					event.preventDefault();
+					event.stopPropagation();
+					
+					contextMenuDialog.positionContextMenu(event);
+
+					scope.$parent.showModalFromController();
+					console.log('after calling scope.$parent.showModalFromController, scope.$parent.showFromController is now ' + scope.$parent.showFromController);
+				});
+				 
+				element.on('mouseleave', function (event) {
+					scope.$parent.showFromController = false;
+				});
+*/				
 				
 				function mousemoveHandler(event) {
 					var cellIndex;
@@ -232,13 +310,13 @@
 					
 					//set the new width of the column immediately to the left, but don't go smaller than the minimum width
 					newWidth = initialWidth + xDistance;
-					if (newWidth < $scope.minWidth) {
-						newWidth = $scope.minWidth;
+					if (newWidth < scope.minWidth) {
+						newWidth = scope.minWidth;
 					}
 					
 					newHeight = initialHeight + yDistance;
-					if (newHeight < $scope.minHeight) {
-						newHeight = $scope.minHeight;
+					if (newHeight < scope.minHeight) {
+						newHeight = scope.minHeight;
 					}
 					
 					console.log('newWidth=' + newWidth + ' initialX=' +initialX + ' xDistance=' + xDistance);
@@ -286,7 +364,8 @@
 			}
 		}
 		
-		
 	}]);
+
+	
 
 })();

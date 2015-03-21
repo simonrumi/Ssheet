@@ -62,3 +62,56 @@ textarea:focus, input:focus {
 .spacer:hover {
 	cursor: se-resize;
 }
+
+.old-cell-context-menu-to-be-deleted {
+	z-index: 10000;
+	position: fixed;
+	width: 200px;
+	height: 300px;
+	background-color: #B5B147;
+	
+	display: inline; /*initially not displayed*/
+}
+
+
+
+/************* ppop up menu stuff **************/
+
+.ss-cell-context-menu {
+	/* A centered div above the overlay with a box shadow. */
+	z-index: 10000;
+	position: absolute;
+	width:50%;
+	 
+	/*center the dialog*/
+	top: 50%;
+	left: 50%;
+	 
+	/* move the dialog around using translate (also can do 3D matrix stuff if desired) */
+	transform: translate(-50%, -50%);
+	-webkit-transform: translate(-50%, -50%);
+  	-moz-transform: translate(-50%, -50%);
+  	
+  	background-color: #B5B147;
+  	box-shadow: 4px 4px 80px #000000;
+}
+
+
+.ss-content-from-custom-html-tag {
+	padding: 10px;
+	text-align: left;
+	background-color: rgba(181,177,71,0.125);
+}
+
+.ss-modal-close {
+	position: relative;
+	top: 3px;
+	right: 5px;
+	padding: 5px;
+	cursor: pointer;
+	font-size: 120%;
+	display: inline-block;
+	font-weight: bold;
+	font-family: 'arial', 'sans-serif';
+	background-color: #B5B147;
+}
