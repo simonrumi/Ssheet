@@ -1,20 +1,18 @@
 h1 {
-	color: #4A2F04;
+	color: #412200; /*deep brown*/
 	font-family: verdana;
 	font-size: 3em;
 	font-weight: bold;
 	
 }
 
-td {
-	border: 1px solid #FFEC67;
-	width: 200px; 
-	padding: 1px;
-}
-
 textarea, input {
+	color: #030400; /*almost black*/
 	border-style: none;
 	width: 100%;
+}
+td {
+	border: none;
 }
 
 textarea {
@@ -24,6 +22,7 @@ textarea {
 
 textarea:focus, input:focus {
 	outline: 0;
+	font-family: verdana;
 }
 
 /* clearfix stuff */ 
@@ -43,8 +42,10 @@ textarea:focus, input:focus {
 #grid {
 	clear:both;
 	float:left;
+	border: 1px solid rgba(65,34,0,0.34); /*hex = #412200; deep brown*/
 }
 
+/*not going to use this after all...so delete*/
 .filter {
 	color: #4A2F04;
 	background-color: rgba(181,177,71,0.5); /* #B5B147 */
@@ -52,47 +53,77 @@ textarea:focus, input:focus {
 	font-weight: bold;
 }
 
-.spacer {
-	background-color: rgba(181,177,71,0.125);
+.data-cell {
+	border-top: 1px solid rgba(65,34,0,0.34); /*hex = #412200; deep brown*/
+	border-left: none;
+	border-bottom: none;
+	border-right: none;
+	width: 200px; 
+	padding: 1px;
+}
+
+
+/************* cell spacer, dragging, & context menu **************/
+
+.spacer, .ss-cell-drag, .ss-cell-tools {
+	width: 10px;
 	padding: 0px;
 	border: none;
-	width: 7px;
+}
+
+.spacer {
+	background-color: rgba(242,228,121,0.33) ; /* #f2e479 pale yellow*/
 }
 
 .spacer:hover {
 	cursor: se-resize;
 }
 
+.ss-cell-drag {
+	height: 8px;
+	background-color: #412200; /*deep brown*/
+}
 
-/************* ppop up menu stuff **************/
+.ss-cell-drag:hover {
+	cursor: se-resize;
+}
 
-.ss-cell-context-menu {
+.ss-cell-tools {
+	height: 8px;
+	background-color: #c68700; /*orangy-yellow*/
+}
+
+.ss-cell-tools:hover {
+	cursor: pointer;
+}
+
+#ss-cell-context-menu, .ss-close-btn {
+	font-family: 'verdana';
+	background-color: #f2e479; /*pale yellow*/
+}
+
+#ss-cell-context-menu {
 	/* A centered div above the overlay with a box shadow. */
 	z-index: 10000;
 	position: absolute;
 	width: 200px;
 	height: 300px;
-  	
-  	background-color: #B5B147;
-  	box-shadow: 4px 4px 80px #000000;
+  	box-shadow: 4px 4px 80px #42351f; /*grey-ish brown*/
 }
 
-
-.ss-content-from-custom-html-tag {
-	padding: 10px;
-	text-align: left;
-	background-color: rgba(181,177,71,0.125);
-}
-
-.ss-modal-close {
+.ss-close-btn {
 	position: relative;
-	top: 3px;
+	margin-left: 5px;
+	top: 5px;
 	right: 5px;
 	padding: 5px;
 	cursor: pointer;
 	font-size: 120%;
-	display: inline-block;
 	font-weight: bold;
-	font-family: 'arial', 'sans-serif';
-	background-color: #B5B147;
 }
+
+.ss-content-from-custom-html-tag {
+	padding: 10px;
+	text-align: left;
+}
+

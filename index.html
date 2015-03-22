@@ -6,17 +6,13 @@
 		
 		<!-- reset stylesheet -->
 		<link style="text/css" rel="stylesheet" href="css/reset.css"/>
-		
-		<!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
 		<!-- our stylesheets -->
 		<link style="text/css" rel="stylesheet" href="css/ssheet.css"/>
 				
 		<!-- 3rd party scripts -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.min.js"></script> <!-- 1.3.13 is the latest, but using 1.2.6 for compatibility with ui-bootstrap -->
-		<script style="text/javascript" src="scripts/ui-bootstrap-tpls-0.12.1.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.13/angular.min.js"></script>
 		
 		<!-- our scripts -->
 		<script style="text/javascript" src="scripts/ssheet.js"></script>
@@ -26,13 +22,35 @@
 		
 		<!-- template for use by context-menu-dialog -->
 		<script type="text/ng-template" id="contextMenuDialog.html">
-			<div class="ss-cell-context-menu" 					
+			<div id="ss-cell-context-menu" 					
 				ng-show="showFromDirective"	
 				show-from-element="showFromController"
 				ng-style="contextMenuStyle">
-					<div class="ss-modal-close" 					ng-click="hideModal()">x</div>
+					<div class="ss-close-btn" 					ng-click="hideModal()">x</div>
 					<div class="ss-content-from-custom-html-tag" 	ng-transclude></div>
-			</div>
+			<div>
+		</script>
+		
+		<!-- template for use by ss-cell-tools -->
+		<script type="text/ng-template" id="cellTools.html">
+			<div 
+				class="ss-cell-tools"
+				show-tool-menu-from-element="showModalFromController()"
+				grid-from-element="grid">
+			</div> 
+		</script>
+		
+		
+		
+		<!-- template for use by ss-cell-drag -->
+		<script type="text/ng-template" id="cellDrag.html">
+			<div 
+				class="ss-cell-drag" 
+				min-width-from-element="minWidth"
+				min-height-from-element="minHeight"
+				grid-from-element="grid"
+				filter-row-from-element="filterRow">
+			</div> 
 		</script>
 		
 	</head>
@@ -44,34 +62,34 @@
 			<!-- the main table holding the grid -->
 			<table id="grid">
 				<thead>
-					<tr>
+					<!-- <tr>
 						<td ng-repeat-start="item in filterRow" id="{{item.cellId}}">
 							<input class="filter" 
 								ng-model="filterRow[$index].filterExpression" 
 								ng-focus="getCurrentColumnFromFilterCell()" 
 								ng-change="updateFilter()">
 						</td>
-						<td ng-repeat-end class="spacer" ss-resize-cells id="spacer_{{item.cellId}}"> 
+						<td ng-repeat-end class="spacer" ss-cell-drag id="spacer_{{item.cellId}}"> 
 						</td>
-					</tr>
+					</tr> -->
 				</thead>
 				
 				<tbody>
 					<tr ng-repeat="item in grid" ng-show="grid[$index].isVisible" >
-						<td ng-repeat-start="subItem in item.cells" id="{{subItem.cellId}}">
+						<td ng-repeat-start="subItem in item.cells" id="{{subItem.cellId}}" class="data-cell">
 							<textarea
-								ss-context-menu-dialog 
 								ng-model="grid[$parent.$index].cells[$index].contents" 
-								ng-show="grid[$parent.$index].cells[$index].isVisible" ></textarea>
+								ng-show="grid[$parent.$index].cells[$index].isVisible" ></textarea> 
+								<!-- used to have ss-context-menu-dialog  in the textarea ...that seems wrong so removed -->
 						</td>
-						<td ng-repeat-end class="spacer" ss-resize-cells id="spacer_{{subItem.cellId}}"></td>
+						<td ng-repeat-end class="spacer">	
+							<ss-cell-tools	id="spacer_{{subItem.cellId}}"></ss-cell-tools>
+							<ss-cell-drag 	id="spacer_{{subItem.cellId}}"></ss-cell-drag>
+						</td>
 					</tr>
 				</tbody>
 				<tfoot></tfoot>
 			</table>
-			
-			
-			<button ng-click="toggleModalFromController()">Open Modal Dialog</button>
 			
 			<context-menu-dialog>
 				<p>this is content from the context-menu-dialog custom html tag which should be inserted where the ng-transclude attr is placed within the template</p>
