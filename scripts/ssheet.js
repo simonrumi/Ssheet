@@ -152,34 +152,49 @@
 
 
 	ssheet.factory('filterByCellData', ['cellFinder', function (cellFinder) {
-		var filterRowsWithCurrentCell;
+		var toggleCellRowFilter;
 		
 		return {
 			
 			/**
-			* The user has assigned the current cell to be a row filter
-			* that means that cells in the current column, which do not contain the text matching the current cell,
+			* The user is toggling whether the current cell to be a row filter.
+			* If row filtering is turned on, that means cells in the current column, 
+			* which do not contain the text matching the current cell,
 			* will have their whole row made invisible
 			*/
-			filterRowsWithCurrentCell: function (cellIdStr, grid) {
+			toggleCellRowFilter: function (cellIdStr, grid) {
 				var i;
-				var arrLength;
+				var j;
+				var allFilters = [];
+				var cellShouldBeHidden;
+				
 				var colArr = cellFinder.getCurrentColumnForCellFromId( cellIdStr, grid );
 				var currentRow = cellFinder.getRowFromCellId( cellIdStr );
 				var currentColumn = cellFinder.getColumnFromCellId( cellIdStr );
 				var currentCellData = grid[currentRow].cells[currentColumn].contents;
 				
-				// loop thru all the cells in the current column, but ignore the current cell (since we don't want to filter out the cell we clicked on).
-				// Any cell that does not contain the text that we have in the current cell should have its row made invisible
-				arrLength = colArr.length;
-				for (i=0; i<arrLength; i++) {					
-					if (i != currentRow) {
-						if ( colArr[i].contents.indexOf(currentCellData) == -1 ) {
-							grid[i].isVisible = false;
-						} else {
-							grid[i].isVisible = true;
-						}
+				//toggle the row filter value 
+				grid[currentRow].cells[currentColumn].isRowFilter = !grid[currentRow].cells[currentColumn].isRowFilter;
+				
+				
+				// loop thru all the cells in the current column to find the current set of filters
+				for (i=0; i<colArr.length; i++) {
+					if ( colArr[i].isRowFilter ) {
+						allFilters.push( colArr[i].contents );
 					}
+				}
+				
+				// Any cell that does not contain the text in all of the filter cells should be hidden
+				for (i=0; i<colArr.length; i++) {	
+					cellShouldBeHidden = false;
+					j=0;
+					while( !cellShouldBeHidden && j<allFilters.length ) {
+						if ( colArr[i].contents.indexOf(allFilters[j]) == -1 ) {
+							cellShouldBeHidden = true;
+						}
+						j++;
+					}
+					grid[i].isVisible = !cellShouldBeHidden;
 				}
 				return grid;
 			},
@@ -211,36 +226,23 @@
 			* the grid object looks like this sort of thing
 			* [
 			* 	{row: 0, isVisible: true, cells: [
-			* 		{cellId: '0_0', col: 0, contents: '', isVisible: true},
-			* 		{cellId: '0_1', col: 1, contents: '', isVisible: true},
-			* 		{cellId: '0_2', col: 2, contents: '', isVisible: true},	
+			* 		{cellId: '0_0', col: 0, contents: '', isVisible: true, isRowFilter: false},
+			* 		{cellId: '0_1', col: 1, contents: '', isVisible: true, isRowFilter: false},
+			* 		{cellId: '0_2', col: 2, contents: '', isVisible: true, isRowFilter: false},	
 			* 	]},
 			* 	{row: 1, isVisible: true, cells: [
-			* 		{cellId: '1_0', col: 0, contents: '', isVisible: true},
-			* 		{cellId: '1_1', col: 1, contents: '', isVisible: true},
-			* 		{cellId: '1_2', col: 2, contents: '', isVisible: true},
+			* 		{cellId: '1_0', col: 0, contents: '', isVisible: true, isRowFilter: false},
+			* 		{cellId: '1_1', col: 1, contents: '', isVisible: true, isRowFilter: false},
+			* 		{cellId: '1_2', col: 2, contents: '', isVisible: true, isRowFilter: false},
 			* 	]},
 			* ]
 			*****/
 			for (i=0; i<$scope.gridheight; i++) {
 				cells = [];
 				for (j=0; j<$scope.gridwidth; j++) {
-					cells[j] = {'cellId' : i + '_' + j, 'col': j, 'contents' : '', 'isVisible' : true};
+					cells[j] = {'cellId' : i + '_' + j, 'col': j, 'contents' : '', 'isVisible' : true, 'isRowFilter' : false};
 				}
 				$scope.grid[i] = {'row' : i, 'isVisible' : true, 'cells' : cells};
-			}
-			
-			/******
-			* initialize the filter data
-			* filterRow looks like 
-			* [
-				{ cellId: 'filt_0', filtercol' : 0, 'filterExpression' : 'this contains a string' }
-				{ cellId: 'filt_1', 'filtercol' : 1, 'filterExpression' : '...that is used as a filter' }
-				{ cellId: 'filt_2', 'filtercol' : 2, 'filterExpression' : '...for the other cells in the column' }
-			* ]
-			***/
-			for (i=0; i<$scope.gridwidth; i++) {
-				$scope.filterRow[i] = { 'cellId': 'filt_' + i, 'filtercol' : i, 'filterExpression' : '' };
 			}
 		}
 		
@@ -248,21 +250,17 @@
 		
 		
 		
-		/**** context menu hide/show stuff ********/
-		$scope.showInController = false;
-		$scope.toggleModalInController = function () {
-			$scope.showInController = !$scope.showInController;
-			console.log('toggleModalInController: $scope.showInController is now ' + $scope.showInController);
+		/**** tool menu hide/show stuff ********/
+		$scope.showToolMenu = false;
+		$scope.toggleToolMenuInCtrl = function () {
+			$scope.showToolMenu = !$scope.showToolMenu;
+			console.log('toggleToolMenuInCtrl: $scope.showToolMenu is now ' + $scope.showToolMenu);
 		}
 		
-		$scope.showModalInController = function () {
-			$scope.showInController = true;
-			console.log('showModal: $scope.showInController is now ' + $scope.showInController);
+		$scope.showToolMenuInCtrl = function () {
+			$scope.showToolMenu = true;
+			console.log('showModal: $scope.showToolMenu is now ' + $scope.showToolMenu);
 		}
-		
-		// $scope.updateGridInController = function (newGrid) {
-		// 	$scope.grid = newGrid;
-		// }
 		
 	}]);
 
@@ -404,8 +402,8 @@
 			// make the context menu visible
 			$scope.showToolMenuInDirective();
 			
-			// use this cell as a filter (this will be moved to somehwere else eventually)
-			$scope.gridInCellToolsDirective = filterByCellData.filterRowsWithCurrentCell( $scope.idOfCurrentElement, $scope.gridInCellToolsDirective );
+			// toggle filtering rows, based on the data in this cell (this will be moved to somehwere else eventually)
+			$scope.gridInCellToolsDirective = filterByCellData.toggleCellRowFilter( $scope.idOfCurrentElement, $scope.gridInCellToolsDirective );
 		}
 	}]);
 
@@ -447,7 +445,7 @@
 			
 			link: function (scope, element, attrs) {
 				
-				scope.hideModal = function() {
+				scope.hideToolMenu = function() {
 					scope.showInDirective = false;
 				};
 				

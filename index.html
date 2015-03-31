@@ -24,9 +24,9 @@
 		<script type="text/ng-template" id="contextMenuDialog.html">
 			<div id="ss-cell-context-menu" 					
 				ng-show="showInDirective"	
-				show-in-element="showInController"
+				show-in-element="showToolMenu"
 				ng-style="contextMenuStyle">
-					<div class="ss-close-btn" 						ng-click="hideModal()">x</div>
+					<div class="ss-close-btn" 						ng-click="hideToolMenu()">x</div>
 					<div class="ss-content-from-custom-html-tag" 	ng-transclude></div>
 			<div>
 		</script>
@@ -37,7 +37,7 @@
 				class="ss-cell-tools"
 				grid-in-cell-tools-element="grid"
 				ng-click="onCellToolsClick()"
-				show-tool-menu-in-element="showModalInController()"> 
+				show-tool-menu-in-element="showToolMenuInCtrl()"> 
 			</div> 
 		</script>
 		
