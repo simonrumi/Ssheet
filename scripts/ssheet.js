@@ -78,27 +78,12 @@
 				} else {
 					throw 'Error: the cell id string ' + cellIdStr + ' was not in one of the expected formats';
 				}
-			},
-			
-			
+			},		
 			
 			/**
-			* DEPRECATED - use getCurrentColumnForCellFromId instead
-			* @method getCurrentColumnForCell When the user clicks on a "spacer" cell
+			* @method getCurrentColumnForCellFromId When the user clicks on a "spacer" cell
 			* this returns an array with all the cells in the column to the immediate left of the spacer.
 			* This is done so the user can drag the width of a column by dragging the spacer cell
-			* @param {DOM element} domElement The element the user clicked on in the UI
-			* @param scope A scope object that has a reference to the grid
-			* @return {Array} An array of cells from the grid oject, that represent all the cells in a particular column
-			*/
-			getCurrentColumnForCell: function (domElement, scope) {
-				var cellId = domElement.attr('id');			
-				return this.getCurrentColumnForCellFromId(cellId, scope.grid);
-			},
-			
-			
-			/**
-			* @method getCurrentColumnForCellFromId Just like getCurrentColumnForCell but it uses different params
 			* @param {String} cellIdStr The id of the cell in the format spacer_[row]_[column]
 			* @param {Object} grid The JSON object representing the grid
 			*/
@@ -119,23 +104,10 @@
 				return columnArr;
 			},
 			
-			
 			/**
-			* DEPRECATED - use getCurrentRowForCellFromId instead
-			* @method getCurrentRowForCell When the user clicks on a "spacer" cell
+			* @method getCurrentRowForCellFromId When the user clicks on a "spacer" cell
 			* This returns an array with all the cells in the row the user clicked on.
 			* This is done so the user can drag the height of a column by dragging the spacer cell
-			* @param {DOM element} domElement The element the user clicked on in the UI
-			* @param scope A scope object (expecting the $scope from the Controller)
-			* @return {Array} An array of cells from the grid oject, that represent all the cells in a particular row
-			*/
-			getCurrentRowForCell: function (domElement, scope) {
-				var cellId = domElement.attr('id');				
-				return this.getCurrentRowForCellFromId(cellId, scope.grid);
-			},
-			
-			/**
-			* @method getCurrentRowForCellFromId Just like getCurrentRowForCell but it uses different params
 			* @param {String} cellIdStr The id of the cell in the format spacer_[row]_[column]
 			* @param {Object} grid The JSON object representing the grid
 			*/
@@ -198,7 +170,6 @@
 				}
 				return grid;
 			},
-			
 		}
 	}]);
 
@@ -258,8 +229,9 @@
 		}
 		
 		$scope.showToolMenuInCtrl = function () {
+			
 			$scope.showToolMenu = true;
-			console.log('showModal: $scope.showToolMenu is now ' + $scope.showToolMenu);
+			console.log('showToolMenuInCtrl: $scope.showToolMenu is now ' + $scope.showToolMenu);
 		}
 		
 	}]);
@@ -319,8 +291,8 @@
 					initialWidth = parseInt( $(cellId).css('width') );
 					initialHeight = parseInt( $(cellId).css('height') );
 					
-					colArr = cellFinder.getCurrentColumnForCell(element, scope);
-					rowArr = cellFinder.getCurrentRowForCell(element, scope);
+					colArr = cellFinder.getCurrentColumnForCellFromId( element.attr('id'), scope.grid );
+					rowArr = cellFinder.getCurrentRowForCellFromId( element.attr('id'), scope.grid );
 					
 					$document.on('mousemove', mousemoveHandler);
 					$document.on('mouseup', mouseupHandler);		
@@ -396,10 +368,15 @@
 
 	
 	ssheet.controller('CellToolsController', ['filterByCellData', '$scope', function (filterByCellData, $scope) {
-		$scope.onCellToolsClick = function () {
+		$scope.onCellToolsClick = function ($event) {
 			console.log('onCellToolsClick: idOfCurrentElement=' + $scope.idOfCurrentElement);
-					
-			// make the context menu visible
+			console.log('...and $event.pageX is ' + $event.pageX + ', $event.pageY is ' + $event.pageY);
+			
+			$('#ss-cell-context-menu').css('top', $event.pageY);
+			$('#ss-cell-context-menu').css('left', $event.pageX + 10); ////BAAADD having magic nubmer in here. also bad having id ss-cell-context-menu
+
+
+			// make the tool menu visible
 			$scope.showToolMenuInDirective();
 			
 			// toggle filtering rows, based on the data in this cell (this will be moved to somehwere else eventually)

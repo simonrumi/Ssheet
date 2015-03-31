@@ -36,8 +36,10 @@
 			<div 
 				class="ss-cell-tools"
 				grid-in-cell-tools-element="grid"
-				ng-click="onCellToolsClick()"
-				show-tool-menu-in-element="showToolMenuInCtrl()"> 
+				ng-click="onCellToolsClick($event)"
+				show-tool-menu-in-element="showToolMenuInCtrl()"
+				xpos-in-element="xPos"
+				ypos-in-element="yPos">
 			</div> 
 		</script>
 		
