@@ -8,13 +8,23 @@
 	* @method cellFinder A Service that provides some helper functions for dealing with the grid
 	*/
 	ssheet.factory('cellFinder', [function() {
-		var getCellId;
+		var getDataCellIdFromSpacerCell;
+		var getRowFromCellId;
+		var getColumnFromCellId;
 		var getCurrentColumnForCell;
+		var getCurrentColumnForCellFromId;
 		var getCurrentRowForCell;
+		var getCurrentRowForCellFromId;
 		
 		return {
 			
-			getDataCellIdFromSpacerCell: function (spacerCellElement, scope) {
+			/*
+			* @method a spacer cell has an id in the format spacer_[row]_[column]
+			* this method returns the id in the format that the data cell has, namely [row]_[column]
+			* @param spacerCellElement The DOM element that is the spacer cell
+			* @return {String} the id in the format that the data cells use
+			*/
+			getDataCellIdFromSpacerCell: function (spacerCellElement) {
 				// the spacer cell has an id like this
 				// spacer_[row]_[column]
 				// whereas a data cell has an id like this
@@ -25,6 +35,55 @@
 			},
 			
 			/**
+			* @method getRowFromCellId Given a cell id string, in the format either spacer_[row]_[column], or [row]_[column],
+			* return the row as an int
+			* @return {int} row number
+			*/
+			getRowFromCellId: function (cellIdStr) {
+				var cellInfoArr = cellIdStr.split('_');
+				
+				if (cellInfoArr.length == 3) {
+					//in this case we expect the cellIdStr to be in the format spacer_[row]_[column]
+					// so the row is the 2nd array element
+					return parseInt( cellInfoArr[1] );
+					
+				} else if (cellInfoArr.length == 2) {
+					// in this case we expect the cellIdStr to be in the format [row]_[column]
+					// so the row is the 1st array element
+					return parseInt( cellInfoArr[0] );
+					
+				} else {
+					throw 'Error: the cell id string ' + cellIdStr + ' was not in one of the expected formats';
+				}
+			},
+			
+			/**
+			* @method getColumnFromCellId Given a cell id string, in the format either spacer_[row]_[column], or [row]_[column],
+			* return the column as an int
+			* @return {int} column number
+			*/
+			getColumnFromCellId: function (cellIdStr) {
+				var cellInfoArr = cellIdStr.split('_');
+				
+				if (cellInfoArr.length == 3) {
+					//in this case we expect the cellIdStr to be in the format spacer_[row]_[column]
+					// so the column is the 3rd array element
+					return parseInt( cellInfoArr[2] );
+					
+				} else if (cellInfoArr.length == 2) {
+					// in this case we expect the cellIdStr to be in the format [row]_[column]
+					// so the column is the 2nd array element
+					return parseInt( cellInfoArr[1] );
+					
+				} else {
+					throw 'Error: the cell id string ' + cellIdStr + ' was not in one of the expected formats';
+				}
+			},
+			
+			
+			
+			/**
+			* DEPRECATED - use getCurrentColumnForCellFromId instead
 			* @method getCurrentColumnForCell When the user clicks on a "spacer" cell
 			* this returns an array with all the cells in the column to the immediate left of the spacer.
 			* This is done so the user can drag the width of a column by dragging the spacer cell
@@ -33,27 +92,36 @@
 			* @return {Array} An array of cells from the grid oject, that represent all the cells in a particular column
 			*/
 			getCurrentColumnForCell: function (domElement, scope) {
+				var cellId = domElement.attr('id');			
+				return this.getCurrentColumnForCellFromId(cellId, scope.grid);
+			},
+			
+			
+			/**
+			* @method getCurrentColumnForCellFromId Just like getCurrentColumnForCell but it uses different params
+			* @param {String} cellIdStr The id of the cell in the format spacer_[row]_[column]
+			* @param {Object} grid The JSON object representing the grid
+			*/
+			getCurrentColumnForCellFromId: function (cellIdStr, grid) {
 				var rowObj;
 				var columnArr = [];
-				
+
 				// the id attribute of the spacer cell is in the format 
 				// spacer_[row number]_[column number]
 				// so split on '_' and get the 3rd array value to get the column number
-				var col = parseInt( domElement.attr('id').split('_')[2] ); 
+				var col = parseInt( cellIdStr.split('_')[2] ); 
 				
 				// put all the cells in the column into the columnArr
-				for (rowObj in scope.grid) {
-					columnArr.push( scope.grid[rowObj].cells[col] );
+				for (rowObj in grid) {
+					columnArr.push( grid[rowObj].cells[col] );
 				}
-				
-				// need to separately add the cell from the filter row
-				//columnArr.push( scope.filterRow[col] );
 				
 				return columnArr;
 			},
 			
 			
 			/**
+			* DEPRECATED - use getCurrentRowForCellFromId instead
 			* @method getCurrentRowForCell When the user clicks on a "spacer" cell
 			* This returns an array with all the cells in the row the user clicked on.
 			* This is done so the user can drag the height of a column by dragging the spacer cell
@@ -62,22 +130,64 @@
 			* @return {Array} An array of cells from the grid oject, that represent all the cells in a particular row
 			*/
 			getCurrentRowForCell: function (domElement, scope) {
+				var cellId = domElement.attr('id');				
+				return this.getCurrentRowForCellFromId(cellId, scope.grid);
+			},
+			
+			/**
+			* @method getCurrentRowForCellFromId Just like getCurrentRowForCell but it uses different params
+			* @param {String} cellIdStr The id of the cell in the format spacer_[row]_[column]
+			* @param {Object} grid The JSON object representing the grid
+			*/
+			getCurrentRowForCellFromId: function (cellIdStr, grid) {
 				// the id attribute of the spacer cell the format 
 				// spacer_[row number]_[column number]
 				// so split on '_' and get the 2nd array value to get the row number
-				var row = parseInt( domElement.attr('id').split('_')[1] );
-				
-				return scope.grid[row]['cells'];
+				var row = parseInt( cellIdStr.split('_')[1] );
+				return grid[row]['cells'];
 			}
-		
+			
 		}
 	}]);
 
 
+	ssheet.factory('filterByCellData', ['cellFinder', function (cellFinder) {
+		var filterRowsWithCurrentCell;
+		
+		return {
+			
+			/**
+			* The user has assigned the current cell to be a row filter
+			* that means that cells in the current column, which do not contain the text matching the current cell,
+			* will have their whole row made invisible
+			*/
+			filterRowsWithCurrentCell: function (cellIdStr, grid) {
+				var i;
+				var arrLength;
+				var colArr = cellFinder.getCurrentColumnForCellFromId( cellIdStr, grid );
+				var currentRow = cellFinder.getRowFromCellId( cellIdStr );
+				var currentColumn = cellFinder.getColumnFromCellId( cellIdStr );
+				var currentCellData = grid[currentRow].cells[currentColumn].contents;
+				
+				// loop thru all the cells in the current column, but ignore the current cell (since we don't want to filter out the cell we clicked on).
+				// Any cell that does not contain the text that we have in the current cell should have its row made invisible
+				arrLength = colArr.length;
+				for (i=0; i<arrLength; i++) {					
+					if (i != currentRow) {
+						if ( colArr[i].contents.indexOf(currentCellData) == -1 ) {
+							grid[i].isVisible = false;
+						} else {
+							grid[i].isVisible = true;
+						}
+					}
+				}
+				return grid;
+			},
+			
+		}
+	}]);
 
 	
-
-
 
 	ssheet.controller('GridController', ['$scope', function ($scope) {
 		$scope.gridwidth = 8;
@@ -136,59 +246,26 @@
 		
 		$scope.init();
 		
-		/**
-		* When the user enters data in the filter row this function is called
-		* It uses the currentColumnArr which is an array of all the cells (one from each row) that are in the column
-		* the currentColumnArr is updated when the user first clicks in the filter by getCurrentColumnFromFilterCell (below) 
-		*/
-		$scope.updateFilter = function () {
-			var cellIndex;
-			
-			for (cellIndex in $scope.currentColumnArr) {
-				if ( $scope.currentColumnArr[cellIndex].contents.indexOf($scope.filterRow[this.element.filtercol].filterExpression) == -1 ) {
-					$scope.grid[cellIndex].isVisible = false;
-				} else {
-					$scope.grid[cellIndex].isVisible = true;
-				}
-			}
-		}
-		
-		/**
-		* When the user first clicks in a filter cell getCurrentColumnFromFilterCell updates currentColumnArr
-		* to be  an array of all the cells (one from each row) that are in the same column as the filter cell
-		* updateFilter() can then repeatedly use the currentColumnArr until the user clicks in another filter column
-		*/
-		$scope.getCurrentColumnFromFilterCell = function () {
-			var rowObj;
-			
-			if ($scope.currentColumnIndex != this.element.filtercol) {
-				$scope.currentColumnIndex = this.element.filtercol;
-				$scope.currentColumnArr = [];
-				
-				for (rowObj in $scope.grid) {
-					$scope.currentColumnArr.push( $scope.grid[rowObj].cells[this.element.filtercol] );
-				}
-			}
-		}
 		
 		
 		/**** context menu hide/show stuff ********/
-		$scope.showFromController = false;
-		$scope.toggleModalFromController = function () {
-			$scope.showFromController = !$scope.showFromController;
-			console.log('toggleModalFromController: $scope.showFromController is now ' + $scope.showFromController);
+		$scope.showInController = false;
+		$scope.toggleModalInController = function () {
+			$scope.showInController = !$scope.showInController;
+			console.log('toggleModalInController: $scope.showInController is now ' + $scope.showInController);
 		}
 		
-		$scope.showModalFromController = function () {
-			$scope.showFromController = true;
-			console.log('showModal: $scope.showFromController is now ' + $scope.showFromController);
+		$scope.showModalInController = function () {
+			$scope.showInController = true;
+			console.log('showModal: $scope.showInController is now ' + $scope.showInController);
 		}
 		
+		// $scope.updateGridInController = function (newGrid) {
+		// 	$scope.grid = newGrid;
+		// }
 		
 	}]);
 
-	
-	
 	
 	
 	/**
@@ -210,15 +287,12 @@
 			templateUrl: 'cellDrag.html',
 			
 			scope: {
-				minWidth: '=minWidthFromElement',
-				minHeight: '=minHeightFromElement',
-				grid: '=gridFromElement',
-				filterRow: '=filterRowFromElement'
+				minWidth: '=minWidthInElement',
+				minHeight: '=minHeightInElement',
+				grid: '=gridInElement',
+				filterRow: '=filterRowInElement'
 			},
 			
-			/// can we use this for anything?
-			controller: 'GridController',
-			controllerAs: 'ctrl',
 			
 			link: function (scope, element, attrs) {
 				var initialX = 0;
@@ -243,7 +317,7 @@
 					initialX = event.pageX - xDistance;
 					initialY = event.pageY - yDistance;
 					
-					cellId = '#' + cellFinder.getDataCellIdFromSpacerCell(element, scope);
+					cellId = '#' + cellFinder.getDataCellIdFromSpacerCell(element);
 					initialWidth = parseInt( $(cellId).css('width') );
 					initialHeight = parseInt( $(cellId).css('height') );
 					
@@ -323,49 +397,35 @@
 	}]);
 
 	
-	
-	ssheet.directive('ssCellTools', ['cellFinder',
-		function (cellFinder) {
+	ssheet.controller('CellToolsController', ['filterByCellData', '$scope', function (filterByCellData, $scope) {
+		$scope.onCellToolsClick = function () {
+			console.log('onCellToolsClick: idOfCurrentElement=' + $scope.idOfCurrentElement);
+					
+			// make the context menu visible
+			$scope.showToolMenuInDirective();
+			
+			// use this cell as a filter (this will be moved to somehwere else eventually)
+			$scope.gridInCellToolsDirective = filterByCellData.filterRowsWithCurrentCell( $scope.idOfCurrentElement, $scope.gridInCellToolsDirective );
+		}
+	}]);
+
+	 
+	ssheet.directive('ssCellTools', [ function () {  
 			
 		return {
+			
 			restrict: 'E',
 			replace: true,
 			//transclude: true,
 			templateUrl: 'cellTools.html',
 			
 			scope: {
-				grid: '=gridFromElement',
-				showToolMenuFromDirective: '&showToolMenuFromElement',
-				//cellToolMenuStyle: {}
+				idOfCurrentElement: '@id', //makes the element's id attribute available here in the directive
+				gridInCellToolsDirective: '=gridInCellToolsElement',
+				showToolMenuInDirective: '&showToolMenuInElement',
 			},
 			
-			link: function (scope, element, attrs) {
-				
-				element.on('mousedown', function (event) {
-					console.log('ssCellTools: context menu selected ');
-					event.preventDefault();
-					event.stopPropagation();
-					
-					scope.showToolMenuFromDirective();
-					
-					// scope.cellToolMenuStyle.position = 'absolute';
-					// scope.cellToolMenuStyle.left = event.pageX + 'px';
-					// scope.cellToolMenuStyle.top = event.pageY + 'px';
-					
-					// originally was:
-					$('#ss-cell-context-menu').css('position', 'absolute');
-					$('#ss-cell-context-menu').css('left', event.pageX + 'px');
-					$('#ss-cell-context-menu').css('top', event.pageY + 'px');
-					
-					scope.$apply();
-					
-				});
-				 
-				// element.on('mouseleave', function (event) {
-				// 	scope.$parent.showFromController = false;
-				// });
-			}
-			
+			controller: 'CellToolsController',
 		}
 	}]);
 
@@ -377,7 +437,7 @@
 			restrict: 'EA',
 			
 			scope: {
-				showFromDirective: '=showFromElement',
+				showInDirective: '=showInElement',
 			},
 			
 			// replace means that the <context-menu-dialog> tag itself will be replaced by the template, rather than being the parent of the template's html
@@ -387,17 +447,8 @@
 			
 			link: function (scope, element, attrs) {
 				
-				// scope.$watch( 
-				// 	function (scope) {
-				// 		return scope.showFromDirective;
-				// 	}, 
-				// 	function () {
-				// 		console.log('wacthed variable scope.showFromDirective changed');
-				// 	} 
-				// );
-				
 				scope.hideModal = function() {
-					scope.showFromDirective = false;
+					scope.showInDirective = false;
 				};
 				
 			},
@@ -405,6 +456,6 @@
 			templateUrl: 'contextMenuDialog.html',
 		}
 	}]);
-
+	
 
 })();

@@ -1,13 +1,36 @@
+/*
+sunflower color scheme:
+#f2e479 pale yellow
+#c68700; orangy-yellow
+#412200; deep brown
+#030400; almost black
+rgba(65,34,0,0.34) #412200; deep brown
+#42351f; grey-ish brown
+
+sunset color scheme:
+#fd5964 rgb(253, 89,100) red-pink
+#f0d963 rgb(240,217,99) yellow
+#364a7a blue
+#1e2347 dark blue
+#7a536f purple
+#05050f black
+*/
+
+body {
+	/*background-image: url('../img/sunflowersTile.png');*/
+	background-color: #364a7a; /*blue*/
+}
+
 h1 {
-	color: #412200; /*deep brown*/
+	color: #1e2347; /*dark blue*/
 	font-family: verdana;
 	font-size: 3em;
 	font-weight: bold;
-	
 }
 
 textarea, input {
-	color: #030400; /*almost black*/
+	background-color: #1e2347; /*dark blue*/
+	color: #ffffff; 
 	border-style: none;
 	width: 100%;
 }
@@ -21,6 +44,7 @@ textarea {
 }
 
 textarea:focus, input:focus {
+	background-color: #7a536f; /*purple*/
 	outline: 0;
 	font-family: verdana;
 }
@@ -42,7 +66,7 @@ textarea:focus, input:focus {
 #grid {
 	clear:both;
 	float:left;
-	border: 1px solid rgba(65,34,0,0.34); /*hex = #412200; deep brown*/
+	border: 1px solid #05050f; /*black*/
 }
 
 /*not going to use this after all...so delete*/
@@ -54,7 +78,7 @@ textarea:focus, input:focus {
 }
 
 .data-cell {
-	border-top: 1px solid rgba(65,34,0,0.34); /*hex = #412200; deep brown*/
+	border-top: 1px solid #05050f; /*black*/
 	border-left: none;
 	border-bottom: none;
 	border-right: none;
@@ -72,16 +96,13 @@ textarea:focus, input:focus {
 }
 
 .spacer {
-	background-color: rgba(242,228,121,0.33) ; /* #f2e479 pale yellow*/
-}
-
-.spacer:hover {
-	cursor: se-resize;
+	background-color: #1e2347; /*dark blue*/
 }
 
 .ss-cell-drag {
-	height: 8px;
-	background-color: #412200; /*deep brown*/
+	height: 10px;
+	background-color: #f0d963; /*yellow*/
+	border-radius: 50%;
 }
 
 .ss-cell-drag:hover {
@@ -89,8 +110,9 @@ textarea:focus, input:focus {
 }
 
 .ss-cell-tools {
-	height: 8px;
-	background-color: #c68700; /*orangy-yellow*/
+	height: 10px;
+	background-color: #fd5964; /*red-pink*/
+	border-radius: 50%;
 }
 
 .ss-cell-tools:hover {
@@ -99,7 +121,7 @@ textarea:focus, input:focus {
 
 #ss-cell-context-menu, .ss-close-btn {
 	font-family: 'verdana';
-	background-color: #f2e479; /*pale yellow*/
+	background-color: #7a536f; /*purple*/
 }
 
 #ss-cell-context-menu {
@@ -108,7 +130,7 @@ textarea:focus, input:focus {
 	position: absolute;
 	width: 200px;
 	height: 300px;
-  	box-shadow: 4px 4px 80px #42351f; /*grey-ish brown*/
+  	box-shadow: 4px 4px 80px rgba(240,217,99,0.4); /*yellow*/
 }
 
 .ss-close-btn {
@@ -126,4 +148,3 @@ textarea:focus, input:focus {
 	padding: 10px;
 	text-align: left;
 }
-

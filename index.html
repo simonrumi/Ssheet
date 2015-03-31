@@ -23,10 +23,10 @@
 		<!-- template for use by context-menu-dialog -->
 		<script type="text/ng-template" id="contextMenuDialog.html">
 			<div id="ss-cell-context-menu" 					
-				ng-show="showFromDirective"	
-				show-from-element="showFromController"
+				ng-show="showInDirective"	
+				show-in-element="showInController"
 				ng-style="contextMenuStyle">
-					<div class="ss-close-btn" 					ng-click="hideModal()">x</div>
+					<div class="ss-close-btn" 						ng-click="hideModal()">x</div>
 					<div class="ss-content-from-custom-html-tag" 	ng-transclude></div>
 			<div>
 		</script>
@@ -35,21 +35,21 @@
 		<script type="text/ng-template" id="cellTools.html">
 			<div 
 				class="ss-cell-tools"
-				show-tool-menu-from-element="showModalFromController()"
-				grid-from-element="grid">
+				grid-in-cell-tools-element="grid"
+				ng-click="onCellToolsClick()"
+				show-tool-menu-in-element="showModalInController()"> 
 			</div> 
 		</script>
-		
 		
 		
 		<!-- template for use by ss-cell-drag -->
 		<script type="text/ng-template" id="cellDrag.html">
 			<div 
 				class="ss-cell-drag" 
-				min-width-from-element="minWidth"
-				min-height-from-element="minHeight"
-				grid-from-element="grid"
-				filter-row-from-element="filterRow">
+				min-width-in-element="minWidth"
+				min-height-in-element="minHeight"
+				grid-in-element="grid"
+				filter-row-in-element="filterRow">
 			</div> 
 		</script>
 		
@@ -57,21 +57,11 @@
 	<body>
 		<div id="mainGrid" ng-controller="GridController">
 			
-			<h1>S-sheet</h1>
+			<h1>s-sheet</h1>
 			
 			<!-- the main table holding the grid -->
 			<table id="grid">
 				<thead>
-					<!-- <tr>
-						<td ng-repeat-start="item in filterRow" id="{{item.cellId}}">
-							<input class="filter" 
-								ng-model="filterRow[$index].filterExpression" 
-								ng-focus="getCurrentColumnFromFilterCell()" 
-								ng-change="updateFilter()">
-						</td>
-						<td ng-repeat-end class="spacer" ss-cell-drag id="spacer_{{item.cellId}}"> 
-						</td>
-					</tr> -->
 				</thead>
 				
 				<tbody>
@@ -79,17 +69,20 @@
 						<td ng-repeat-start="subItem in item.cells" id="{{subItem.cellId}}" class="data-cell">
 							<textarea
 								ng-model="grid[$parent.$index].cells[$index].contents" 
-								ng-show="grid[$parent.$index].cells[$index].isVisible" ></textarea> 
-								<!-- used to have ss-context-menu-dialog  in the textarea ...that seems wrong so removed -->
+								ng-show="grid[$parent.$index].cells[$index].isVisible" >
+							</textarea>
 						</td>
 						<td ng-repeat-end class="spacer">	
-							<ss-cell-tools	id="spacer_{{subItem.cellId}}"></ss-cell-tools>
+							<ss-cell-tools	id="spacer_{{subItem.cellId}}"> 
+							</ss-cell-tools>
 							<ss-cell-drag 	id="spacer_{{subItem.cellId}}"></ss-cell-drag>
 						</td>
 					</tr>
 				</tbody>
-				<tfoot></tfoot>
+				<tfoot>
+				</tfoot>
 			</table>
+			
 			
 			<context-menu-dialog>
 				<p>this is content from the context-menu-dialog custom html tag which should be inserted where the ng-transclude attr is placed within the template</p>
