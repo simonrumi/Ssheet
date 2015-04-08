@@ -133,6 +133,13 @@ textarea:focus, input:focus {
   	box-shadow: 4px 4px 80px rgba(240,217,99,0.4); /*yellow*/
 }
 
+.ss-cell-tools-menu-item {
+	background-color: #364a7a; /*blue*/
+	margin: 3px 5px 3px 5px;
+	padding: 5px;
+	cursor: pointer;
+}
+
 .ss-close-btn {
 	position: relative;
 	margin-left: 5px;

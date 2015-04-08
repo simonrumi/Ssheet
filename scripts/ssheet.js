@@ -219,8 +219,6 @@
 		
 		$scope.init();
 		
-		
-		
 		/**** tool menu hide/show stuff ********/
 		$scope.showToolMenu = false;
 		$scope.toggleToolMenuInCtrl = function () {
@@ -229,10 +227,17 @@
 		}
 		
 		$scope.showToolMenuInCtrl = function () {
-			
 			$scope.showToolMenu = true;
 			console.log('showToolMenuInCtrl: $scope.showToolMenu is now ' + $scope.showToolMenu);
 		}
+		
+		//when the user clicks on the orange cell-tools button this will be updated with the id of its cell
+		$scope.idOfCurrentCell = '';
+		
+		$scope.$on('UpdateIdOfCurrentCell', function (emittedObj) {
+			console.log('caught event UpdateIdOfCurrentCell...id is ' + emittedObj.targetScope.idOfCurrentElement);
+			$scope.idOfCurrentCell = emittedObj.targetScope.idOfCurrentElement;
+		});
 		
 	}]);
 
@@ -366,25 +371,28 @@
 		
 	}]);
 
-	
+	/**
+	* @class CellToolsController This is a Controller used by the Directive ssCellTools
+	*/
 	ssheet.controller('CellToolsController', ['filterByCellData', '$scope', function (filterByCellData, $scope) {
+		
 		$scope.onCellToolsClick = function ($event) {
-			console.log('onCellToolsClick: idOfCurrentElement=' + $scope.idOfCurrentElement);
-			console.log('...and $event.pageX is ' + $event.pageX + ', $event.pageY is ' + $event.pageY);
+			console.log('onCellToolsClick: $event.pageX is ' + $event.pageX + ', $event.pageY is ' + $event.pageY);
 			
 			$('#ss-cell-context-menu').css('top', $event.pageY);
 			$('#ss-cell-context-menu').css('left', $event.pageX + 10); ////BAAADD having magic nubmer in here. also bad having id ss-cell-context-menu
 
-
 			// make the tool menu visible
 			$scope.showToolMenuInDirective();
 			
-			// toggle filtering rows, based on the data in this cell (this will be moved to somehwere else eventually)
-			$scope.gridInCellToolsDirective = filterByCellData.toggleCellRowFilter( $scope.idOfCurrentElement, $scope.gridInCellToolsDirective );
+			//set the id of the current cell in the GridController
+			$scope.$emit('UpdateIdOfCurrentCell'); 
 		}
 	}]);
 
-	 
+	/**
+	* @class ssCellTools The Cell Tools menu comes up when clicking on the top, orange dot next to every cell in the grid 
+	*/ 
 	ssheet.directive('ssCellTools', [ function () {  
 			
 		return {
@@ -395,7 +403,8 @@
 			templateUrl: 'cellTools.html',
 			
 			scope: {
-				idOfCurrentElement: '@id', //makes the element's id attribute available here in the directive
+				// this makes the element's id attribute available here in the directive
+				idOfCurrentElement: '@id',				
 				gridInCellToolsDirective: '=gridInCellToolsElement',
 				showToolMenuInDirective: '&showToolMenuInElement',
 			},
@@ -407,7 +416,7 @@
 
 
 
-	ssheet.directive('contextMenuDialog', [ function () {
+	ssheet.directive('cellToolsDialog', ['filterByCellData', function (filterByCellData) {
 		return {
 			restrict: 'EA',
 			
@@ -426,9 +435,15 @@
 					scope.showInDirective = false;
 				};
 				
+				scope.onColumnFilterClick = function () {
+					
+					console.log('onColumnFilterClick: scope.$parent.idOfCurrentCell=' + scope.$parent.idOfCurrentCell);
+					scope.$parent.grid = filterByCellData.toggleCellRowFilter( scope.$parent.idOfCurrentCell, scope.$parent.grid );
+				};
+				
 			},
 			
-			templateUrl: 'contextMenuDialog.html',
+			templateUrl: 'cellToolsDialog.html',
 		}
 	}]);
 	

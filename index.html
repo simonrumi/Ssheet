@@ -20,31 +20,36 @@
 		<link rel="icon" href="favicon.ico" type="img/x-icon">
 		<link rel="shortcut icon" href="favicon.ico" type="img/x-icon">
 		
-		<!-- template for use by context-menu-dialog -->
-		<script type="text/ng-template" id="contextMenuDialog.html">
+		
+		<!-- template for the orange ss-cell-tools button-->
+		<script type="text/ng-template" id="cellTools.html">
+			<div 
+				class="ss-cell-tools"
+				grid-in-cell-tools-element="grid"
+				id-of-current-cell-in-cell-tools-element="idOfCurrentCell"
+				ng-click="onCellToolsClick($event)"
+				show-tool-menu-in-element="showToolMenuInCtrl()">
+			</div> 
+		</script>
+		
+		<!-- template for the cell tool dialog -->
+		<script type="text/ng-template" id="cellToolsDialog.html">
 			<div id="ss-cell-context-menu" 					
 				ng-show="showInDirective"	
 				show-in-element="showToolMenu"
 				ng-style="contextMenuStyle">
 					<div class="ss-close-btn" 						ng-click="hideToolMenu()">x</div>
 					<div class="ss-content-from-custom-html-tag" 	ng-transclude></div>
+					<div class="ss-cell-tools-menu-item" 
+						ng-click="onColumnFilterClick()">
+						filter column
+					</div>
 			<div>
 		</script>
 		
-		<!-- template for use by ss-cell-tools -->
-		<script type="text/ng-template" id="cellTools.html">
-			<div 
-				class="ss-cell-tools"
-				grid-in-cell-tools-element="grid"
-				ng-click="onCellToolsClick($event)"
-				show-tool-menu-in-element="showToolMenuInCtrl()"
-				xpos-in-element="xPos"
-				ypos-in-element="yPos">
-			</div> 
-		</script>
 		
 		
-		<!-- template for use by ss-cell-drag -->
+		<!-- template for the yellow ss-cell-drag button -->
 		<script type="text/ng-template" id="cellDrag.html">
 			<div 
 				class="ss-cell-drag" 
@@ -75,8 +80,7 @@
 							</textarea>
 						</td>
 						<td ng-repeat-end class="spacer">	
-							<ss-cell-tools	id="spacer_{{subItem.cellId}}"> 
-							</ss-cell-tools>
+							<ss-cell-tools	id="spacer_{{subItem.cellId}}"></ss-cell-tools>
 							<ss-cell-drag 	id="spacer_{{subItem.cellId}}"></ss-cell-drag>
 						</td>
 					</tr>
@@ -86,9 +90,7 @@
 			</table>
 			
 			
-			<context-menu-dialog>
-				<p>this is content from the context-menu-dialog custom html tag which should be inserted where the ng-transclude attr is placed within the template</p>
-			</context-menu-dialog>
+			<cell-tools-dialog><p>Cell Tools</p></cell-tools-dialog>
 			
 		</div> <!-- end of mainGrid -->
 		
