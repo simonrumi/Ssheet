@@ -8,11 +8,16 @@ rgba(65,34,0,0.34) #412200; deep brown
 #42351f; grey-ish brown
 
 sunset color scheme:
-#fd5964 rgb(253, 89,100) red-pink
+#fd5964 rgb(253, 89,100) red-pink (orange)
+#F50C1C rgb(245,12,28) tomato red
 #f0d963 rgb(240,217,99) yellow
+#F7DA94 pale yellow
 #364a7a blue
 #1e2347 dark blue
-#7a536f purple
+#3f3e61 blue purple
+#8b90c7 pale purply blue
+#7a536f rgb(122,83,111) darker purple
+#402B42 purple
 #05050f black
 */
 
@@ -34,6 +39,7 @@ textarea, input {
 	border-style: none;
 	width: 100%;
 }
+
 td {
 	border: none;
 }
@@ -87,12 +93,16 @@ textarea:focus, input:focus {
 }
 
 
-/************* cell spacer, dragging, & context menu **************/
+/************* cell spacer, dragging, & tool (context) menu **************/
 
 .spacer, .ss-cell-drag, .ss-cell-tools {
 	width: 10px;
 	padding: 0px;
 	border: none;
+}
+
+.ss-cell-drag, .ss-cell-tools {
+	border-radius: 0% 50% 50% 0%;
 }
 
 .spacer {
@@ -102,7 +112,6 @@ textarea:focus, input:focus {
 .ss-cell-drag {
 	height: 10px;
 	background-color: #f0d963; /*yellow*/
-	border-radius: 50%;
 }
 
 .ss-cell-drag:hover {
@@ -112,16 +121,20 @@ textarea:focus, input:focus {
 .ss-cell-tools {
 	height: 10px;
 	background-color: #fd5964; /*red-pink*/
-	border-radius: 50%;
 }
 
 .ss-cell-tools:hover {
 	cursor: pointer;
 }
 
+.ss-cell-tools-activated {
+	background-color: #F50C1C; /*tomato red*/
+}
+
 #ss-cell-context-menu, .ss-close-btn {
 	font-family: 'verdana';
-	background-color: #7a536f; /*purple*/
+	color: #fd5964;  /*rgb(253, 89,100) red-pink (orange)*/
+	background-color: #3f3e61; /* blue purple */
 }
 
 #ss-cell-context-menu {
@@ -130,7 +143,20 @@ textarea:focus, input:focus {
 	position: absolute;
 	width: 200px;
 	height: 300px;
-  	box-shadow: 4px 4px 80px rgba(240,217,99,0.4); /*yellow*/
+  	box-shadow: 5px 5px 20px 8px rgba(253, 89,100,0.25); /*red-pink (orange) (h-shadow v-shadow blur spread color) */
+}
+
+.ss-close-btn {
+	position: relative;
+	float: right;
+	margin-left: 5px;
+	top: 5px;
+	right: 5px;
+	padding: 0px 2px 2px 2px;
+	cursor: pointer;
+	font-size: 120%;
+	font-weight: bold;
+	background-color: #364a7a; /*blue*/
 }
 
 .ss-cell-tools-menu-item {
@@ -140,18 +166,8 @@ textarea:focus, input:focus {
 	cursor: pointer;
 }
 
-.ss-close-btn {
-	position: relative;
-	margin-left: 5px;
-	top: 5px;
-	right: 5px;
-	padding: 5px;
-	cursor: pointer;
-	font-size: 120%;
-	font-weight: bold;
-}
-
 .ss-content-from-custom-html-tag {
 	padding: 10px;
 	text-align: left;
+	font-weight: bold;
 }

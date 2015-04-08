@@ -436,8 +436,8 @@
 				};
 				
 				scope.onColumnFilterClick = function () {
-					
 					console.log('onColumnFilterClick: scope.$parent.idOfCurrentCell=' + scope.$parent.idOfCurrentCell);
+					$('#' + scope.$parent.idOfCurrentCell).toggleClass('ss-cell-tools-activated');
 					scope.$parent.grid = filterByCellData.toggleCellRowFilter( scope.$parent.idOfCurrentCell, scope.$parent.grid );
 				};
 				
