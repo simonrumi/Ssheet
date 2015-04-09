@@ -83,18 +83,14 @@
 			/**
 			* @method getCurrentColumnForCellFromId When the user clicks on a "spacer" cell
 			* this returns an array with all the cells in the column to the immediate left of the spacer.
-			* This is done so the user can drag the width of a column by dragging the spacer cell
 			* @param {String} cellIdStr The id of the cell in the format spacer_[row]_[column]
 			* @param {Object} grid The JSON object representing the grid
+			* @return {Array} an array of cells in the column
 			*/
 			getCurrentColumnForCellFromId: function (cellIdStr, grid) {
 				var rowObj;
 				var columnArr = [];
-
-				// the id attribute of the spacer cell is in the format 
-				// spacer_[row number]_[column number]
-				// so split on '_' and get the 3rd array value to get the column number
-				var col = parseInt( cellIdStr.split('_')[2] ); 
+				var col = this.getColumnFromCellId( cellIdStr ); 
 				
 				// put all the cells in the column into the columnArr
 				for (rowObj in grid) {
@@ -107,15 +103,12 @@
 			/**
 			* @method getCurrentRowForCellFromId When the user clicks on a "spacer" cell
 			* This returns an array with all the cells in the row the user clicked on.
-			* This is done so the user can drag the height of a column by dragging the spacer cell
 			* @param {String} cellIdStr The id of the cell in the format spacer_[row]_[column]
 			* @param {Object} grid The JSON object representing the grid
+			* @return {Array} an array of cells in the row
 			*/
 			getCurrentRowForCellFromId: function (cellIdStr, grid) {
-				// the id attribute of the spacer cell the format 
-				// spacer_[row number]_[column number]
-				// so split on '_' and get the 2nd array value to get the row number
-				var row = parseInt( cellIdStr.split('_')[1] );
+				var row = this.getRowFromCellId( cellIdStr );
 				return grid[row]['cells'];
 			}
 			
@@ -170,6 +163,57 @@
 				}
 				return grid;
 			},
+			
+			
+			
+			/**
+			* The user is toggling whether the current cell to be a column filter.
+			* If column filtering is turned on, that means cells in the same row, 
+			* which do not contain the text matching the current cell,
+			* will have their whole column made invisible
+			*/
+			toggleCellColumnFilter: function (cellIdStr, grid) {
+				var i;
+				var j;
+				var allFilters = [];
+				var cellShouldBeHidden;
+				var currentColArr = [];
+				
+				var rowArr = cellFinder.getCurrentRowForCellFromId( cellIdStr, grid );
+				var currentRow = cellFinder.getRowFromCellId( cellIdStr );
+				var currentColumn = cellFinder.getColumnFromCellId( cellIdStr );
+				
+				//toggle the column filter value 
+				grid[currentRow].cells[currentColumn].isColumnFilter = !grid[currentRow].cells[currentColumn].isColumnFilter;
+				
+				// loop thru all the cells in the current row to find the current set of filters
+				for (i=0; i<rowArr.length; i++) {
+					if ( rowArr[i].isColumnFilter ) {
+						allFilters.push( rowArr[i].contents );
+					}
+				}
+				
+				// Any cell that does not contain the text in all of the filter cells should be hidden
+				for (i=0; i<rowArr.length; i++) {	
+					cellShouldBeHidden = false;
+					j=0;
+					while( !cellShouldBeHidden && j<allFilters.length ) {
+						if ( rowArr[i].contents.indexOf(allFilters[j]) == -1 ) {
+							cellShouldBeHidden = true;
+						}
+						j++;
+					}
+					
+					// if a cell is to be hidden, then its whole column should be hidden
+					// and vice-versa if it is not
+					currentColArr = cellFinder.getCurrentColumnForCellFromId( rowArr[i].cellId, grid );
+					
+					for (j=0; j<currentColArr.length; j++) {
+						currentColArr[j].isVisible = !cellShouldBeHidden;
+					}
+				}
+				return grid;
+			},
 		}
 	}]);
 
@@ -197,21 +241,21 @@
 			* the grid object looks like this sort of thing
 			* [
 			* 	{row: 0, isVisible: true, cells: [
-			* 		{cellId: '0_0', col: 0, contents: '', isVisible: true, isRowFilter: false},
-			* 		{cellId: '0_1', col: 1, contents: '', isVisible: true, isRowFilter: false},
-			* 		{cellId: '0_2', col: 2, contents: '', isVisible: true, isRowFilter: false},	
+			* 		{cellId: '0_0', col: 0, contents: '', isVisible: true, isRowFilter: false, isColumnFilter: false},
+			* 		{cellId: '0_1', col: 1, contents: '', isVisible: true, isRowFilter: false, isColumnFilter: false},
+			* 		{cellId: '0_2', col: 2, contents: '', isVisible: true, isRowFilter: false, isColumnFilter: false},	
 			* 	]},
 			* 	{row: 1, isVisible: true, cells: [
-			* 		{cellId: '1_0', col: 0, contents: '', isVisible: true, isRowFilter: false},
-			* 		{cellId: '1_1', col: 1, contents: '', isVisible: true, isRowFilter: false},
-			* 		{cellId: '1_2', col: 2, contents: '', isVisible: true, isRowFilter: false},
+			* 		{cellId: '1_0', col: 0, contents: '', isVisible: true, isRowFilter: false, isColumnFilter: false},
+			* 		{cellId: '1_1', col: 1, contents: '', isVisible: true, isRowFilter: false, isColumnFilter: false},
+			* 		{cellId: '1_2', col: 2, contents: '', isVisible: true, isRowFilter: false, isColumnFilter: false},
 			* 	]},
 			* ]
 			*****/
 			for (i=0; i<$scope.gridheight; i++) {
 				cells = [];
 				for (j=0; j<$scope.gridwidth; j++) {
-					cells[j] = {'cellId' : i + '_' + j, 'col': j, 'contents' : '', 'isVisible' : true, 'isRowFilter' : false};
+					cells[j] = {'cellId' : i + '_' + j, 'col': j, 'contents' : '', 'isVisible' : true, 'isRowFilter' : false, 'isColumnFilter' : false};
 				}
 				$scope.grid[i] = {'row' : i, 'isVisible' : true, 'cells' : cells};
 			}
@@ -379,8 +423,8 @@
 		$scope.onCellToolsClick = function ($event) {
 			console.log('onCellToolsClick: $event.pageX is ' + $event.pageX + ', $event.pageY is ' + $event.pageY);
 			
-			$('#ss-cell-context-menu').css('top', $event.pageY);
-			$('#ss-cell-context-menu').css('left', $event.pageX + 10); ////BAAADD having magic nubmer in here. also bad having id ss-cell-context-menu
+			$('#ss-cell-tool-menu').css('top', $event.pageY);
+			$('#ss-cell-tool-menu').css('left', $event.pageX + 10); ////BAAADD having magic nubmer in here. also bad having id ss-cell-tool-menu
 
 			// make the tool menu visible
 			$scope.showToolMenuInDirective();
@@ -438,7 +482,19 @@
 				scope.onColumnFilterClick = function () {
 					console.log('onColumnFilterClick: scope.$parent.idOfCurrentCell=' + scope.$parent.idOfCurrentCell);
 					$('#' + scope.$parent.idOfCurrentCell).toggleClass('ss-cell-tools-activated');
+					scope.$parent.grid = filterByCellData.toggleCellColumnFilter( scope.$parent.idOfCurrentCell, scope.$parent.grid );
+					
+					// hide the cell tools menu
+					scope.showInDirective = false;
+				};
+				
+				scope.onRowFilterClick = function () {
+					console.log('onRowFilterClick: scope.$parent.idOfCurrentCell=' + scope.$parent.idOfCurrentCell);
+					$('#' + scope.$parent.idOfCurrentCell).toggleClass('ss-cell-tools-activated');
 					scope.$parent.grid = filterByCellData.toggleCellRowFilter( scope.$parent.idOfCurrentCell, scope.$parent.grid );
+					
+					// hide the cell tools menu
+					scope.showInDirective = false;
 				};
 				
 			},

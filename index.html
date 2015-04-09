@@ -34,15 +34,19 @@
 		
 		<!-- template for the cell tool dialog -->
 		<script type="text/ng-template" id="cellToolsDialog.html">
-			<div id="ss-cell-context-menu" 					
+			<div id="ss-cell-tool-menu" 					
 				ng-show="showInDirective"	
 				show-in-element="showToolMenu"
 				ng-style="contextMenuStyle">
 					<div class="ss-close-btn" 						ng-click="hideToolMenu()">x</div>
 					<div class="ss-content-from-custom-html-tag" 	ng-transclude></div>
 					<div class="ss-cell-tools-menu-item" 
+						ng-click="onRowFilterClick()">
+						filter out rows
+					</div>
+					<div class="ss-cell-tools-menu-item" 
 						ng-click="onColumnFilterClick()">
-						filter column
+						filter out columns
 					</div>
 			<div>
 		</script>
@@ -73,15 +77,17 @@
 				
 				<tbody>
 					<tr ng-repeat="item in grid" ng-show="grid[$index].isVisible" >
-						<td ng-repeat-start="subItem in item.cells" id="{{subItem.cellId}}" class="data-cell">
-							<textarea
-								ng-model="grid[$parent.$index].cells[$index].contents" 
-								ng-show="grid[$parent.$index].cells[$index].isVisible" >
-							</textarea>
+						<td ng-repeat-start="subItem in item.cells" 
+							id="{{subItem.cellId}}" 
+							class="data-cell"
+							ng-show="grid[$parent.$index].cells[$index].isVisible" >
+								<textarea ng-model="grid[$parent.$index].cells[$index].contents"></textarea>
 						</td>
-						<td ng-repeat-end class="spacer">	
-							<ss-cell-tools	id="tools_{{subItem.cellId}}"></ss-cell-tools>
-							<ss-cell-drag 	id="drag_{{subItem.cellId}}"></ss-cell-drag>
+						<td ng-repeat-end 
+							class="spacer" 
+							ng-show="grid[$parent.$index].cells[$index].isVisible">	
+								<ss-cell-tools	id="tools_{{subItem.cellId}}"></ss-cell-tools>
+								<ss-cell-drag 	id="drag_{{subItem.cellId}}"></ss-cell-drag>
 						</td>
 					</tr>
 				</tbody>
