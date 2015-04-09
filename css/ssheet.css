@@ -9,6 +9,7 @@ rgba(65,34,0,0.34) #412200; deep brown
 
 sunset color scheme:
 #fd5964 rgb(253, 89,100) red-pink (orange)
+#FDAAAF pale red-pink
 rgba(255, 0, 102, 1.0); neon red-pink
 #F50C1C rgb(245,12,28) tomato red
 #f0d963 rgb(240,217,99) yellow
@@ -96,13 +97,13 @@ textarea:focus, input:focus {
 
 /************* cell spacer, dragging, & tool (context) menu **************/
 
-.spacer, .ss-cell-drag, .ss-cell-tools {
+.spacer, .ss-cell-drag, .ss-cell-tools-btn {
 	width: 10px;
 	padding: 0px;
 	border: none;
 }
 
-.ss-cell-drag, .ss-cell-tools {
+.ss-cell-drag, .ss-cell-tools-btn {
 	border-radius: 0% 50% 50% 0%;
 }
 
@@ -120,27 +121,26 @@ textarea:focus, input:focus {
 	background-color: rgba(240,217,99, 1.0); /* #f0d963 yellow*/
 }
 
-.ss-cell-tools {
+.ss-cell-tools-btn {
 	height: 10px;
 	background-color: rgba(253, 89,100, 0.5); /* red-pink (orange) #fd5964 red-pink*/
 }
 
-.ss-cell-tools:hover {
+.ss-cell-tools-btn:hover {
 	cursor: pointer;
 }
 
-.ss-cell-tools-activated {
+.ss-cell-tools-btn-activated {
 	background-color: rgba(255, 0, 102, 1.0); /* neon red-pink */
 }
 
 #ss-cell-tool-menu, .ss-close-btn {
 	font-family: 'verdana';
-	color: #fd5964;  /*rgb(253, 89,100) red-pink (orange)*/
 	background-color: #3f3e61; /* blue purple */
+	color: #FDAAAF; /*pale red-pink*/
 }
 
 #ss-cell-tool-menu {
-	/* A centered div above the overlay with a box shadow. */
 	z-index: 10000;
 	position: absolute;
 	width: 200px;
@@ -149,6 +149,7 @@ textarea:focus, input:focus {
 }
 
 .ss-close-btn {
+	color: #fd5964; /*red-pink*/
 	position: relative;
 	float: right;
 	margin-left: 5px;
@@ -166,6 +167,10 @@ textarea:focus, input:focus {
 	margin: 3px 5px 10px 5px;
 	padding: 5px;
 	cursor: pointer;
+}
+
+.ss-cell-tools-menu-item-activated {
+	background-color: #1e2347; /*dark blue*/
 }
 
 .ss-content-from-custom-html-tag {
